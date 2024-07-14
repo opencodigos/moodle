@@ -4,39 +4,25 @@ unset($CFG);
 global $CFG;
 $CFG = new stdClass();
 
-$CFG->dbtype    = getenv('MOODLE_DATABASE_TYPE');
+$CFG->dbtype    = 'mysqli';
 $CFG->dblibrary = 'native';
-$CFG->dbhost    = 'db';
-$CFG->dbname    = getenv('MOODLE_DATABASE_NAME');
-$CFG->dbuser    = getenv('MOODLE_DATABASE_USER');
-$CFG->dbpass    = getenv('MOODLE_DATABASE_PASSWORD');
+$CFG->dbhost    = 'localhost';
+$CFG->dbname    = 'moodle';
+$CFG->dbuser    = 'moodle';
+$CFG->dbpass    = 'm@0dl3ing';
 $CFG->prefix    = 'mdl_';
 $CFG->dboptions = array (
-    'dbpersist' => 0,
-    'dbport' => '',
-    'dbsocket' => '',
-    'dbcollation' => 'utf8mb4_unicode_ci',
+  'dbpersist' => 0,
+  'dbport' => '',
+  'dbsocket' => '',
+  'dbcollation' => 'utf8mb4_unicode_ci',
 );
 
-$host = 'localhost';
-if (!empty(getenv('MOODLE_DOCKER_WEB_HOST'))) {
-    $host = getenv('MOODLE_DOCKER_WEB_HOST');
-}
-$CFG->wwwroot   = "http://{$host}";
-$port = getenv('MOODLE_DOCKER_WEB_PORT');
-if (!empty($port)) {
-    // Extract port in case the format is bind_ip:port.
-    $parts = explode(':', $port);
-    $port = end($parts);
-    if ((string)(int)$port === (string)$port) { // Only if it's int value.
-        $CFG->wwwroot .= ":{$port}";
-    }
-}
+$CFG->wwwroot   = 'http://localhost:8080';
 $CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
 
 $CFG->directorypermissions = 0777;
-
 
 require_once(__DIR__ . '/lib/setup.php');
 

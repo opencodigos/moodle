@@ -1,39 +1,43 @@
-version: "3.9"
+version: "2"
 services:
-  moodledb: # Banco de dados
-    image: "mysql:${MOODLE_DOCKER_DB_VERSION:-8.0}"
+  moodledb:
+    image: mysql:8.0
     command: >
-            --character-set-server=utf8mb4
-            --collation-server=utf8mb4_bin
-            --skip-log-bin
-    container_name: moodledb
-    restart: always
-    env_file: ".env"
+                --character-set-server=utf8mb4
+                --collation-server=utf8mb4_bin
+                --skip-log-bin
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: "m@0dl3ing"
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: "m@0dl3ing"
       MYSQL_DATABASE: moodle
-      MYSQL_USER: moodleadmin
-      MYSQL_PASSWORD: moodle123123@
     volumes:
-      - "${MOODLE_DOCKER_VOLDB}:/var/lib/mysql"
+      - ./mysql_data/:/var/lib/mysql
 
-  moodleapp: # Aplicação do Moodle
-    image: "moodlehq/moodle-php-apache:${MOODLE_DOCKER_PHP_VERSION}"
+  moodleapp:
+    # apache com php e todas as estenções instaladas com sucesso
+    image: moodlehq/moodle-php-apache:8.1
     container_name: moodleapp
     depends_on:
       - moodledb
-    restart: always
-    env_file: ".env"
     environment: 
-      MOODLE_DATABASE_TYPE: mysqli
-      MOODLE_DATABASE_DBCOLLATION: utf8mb4_bin # utf8mb4: É a codificação de caracteres UTF-8 que suporta até 4 bytes por caractere
-      MOODLE_DATABASE_HOST: moodledb
-      MOODLE_DATABASE_NAME: moodle
-      MOODLE_DATABASE_USER: moodleadmin
-      MOODLE_DATABASE_PASSWORD: moodle123123@  
+      MOODLE_DOCKER_WEB_PORT: 8080
+      MOODLE_DOCKER_DBNAME: moodle
+      MOODLE_DOCKER_DBUSER: moodle
+      MOODLE_DOCKER_DBPASS: "m@0dl3ing"
+      MOODLE_DOCKER_BROWSER: firefox
+      # MOODLE_DOCKER_WEB_HOST:  
+      MOODLE_DOCKER_DBTYPE: mysqli
+      MOODLE_DOCKER_DBCOLLATION: utf8mb4_bin # utf8mb4: É a codificação de caracteres UTF-8 que suporta até 4 bytes por caractere
     ports:
-      - "${MOODLE_DOCKER_WEB_PORT}:80"
+      - "8080:80"
     volumes:
-      - "${MOODLE_DOCKER_MOODLE}:/var/www/html"
-      - "${MOODLE_DOCKER_MOODLEDATA}:/var/www/moodledata"
-      - "${ASSETDIR}:/web/apache2_faildumps.conf:/etc/apache2/conf-enabled/apache2_faildumps.conf" 
+      - ./moodle_code:/var/www/html
+      - ./moodle_data:/var/www/moodledata
+      - ./assets:/web/apache2_faildumps.conf:/etc/apache2/conf-enabled/apache2_faildumps.conf
+    entrypoint: /bin/bash -c "chmod -R 777 /var/www/moodledata && docker-php-entrypoint apache2-foreground"
+
+volumes:
+  mysql_data:
+  moodle_code:
+  moodle_data:
